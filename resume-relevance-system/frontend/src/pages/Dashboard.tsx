@@ -9,6 +9,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis
 import toast from 'react-hot-toast';
 
 import { dashboardAPI } from '../services/api';
+import EvaluationTrigger from '../components/EvaluationTrigger';
 import type { DashboardStats } from '../types';
 
 const COLORS = {
@@ -196,6 +197,14 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Activity */}
+      </div>
+
+      {/* Evaluation Trigger */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <EvaluationTrigger onEvaluationComplete={fetchDashboardStats} />
+        </div>
+        
         <div className="card">
           <div className="card-header">
             <h3 className="text-lg font-medium text-secondary-900">
@@ -218,10 +227,10 @@ export default function Dashboard() {
                       `} />
                       <div>
                         <p className="text-sm font-medium text-secondary-900">
-                          Evaluation #{evaluation.id}
+                          {evaluation.resume?.candidate_name || 'Unknown Candidate'}
                         </p>
                         <p className="text-xs text-secondary-500">
-                          Job #{evaluation.job_id} • Resume #{evaluation.resume_id}
+                          {evaluation.job?.title || 'Unknown Job'}
                         </p>
                       </div>
                     </div>
@@ -248,28 +257,42 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions Section */}
       <div className="card">
         <div className="card-header">
-          <h3 className="text-lg font-medium text-secondary-900">Quick Actions</h3>
+          <h3 className="text-lg font-medium text-secondary-900">Complete Workflow Guide</h3>
+          <p className="text-sm text-secondary-500">
+            Follow these steps for the complete placement process
+          </p>
         </div>
         <div className="card-body">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button className="btn-primary p-4 text-left">
-              <BriefcaseIcon className="h-6 w-6 mb-2" />
-              <div className="text-sm font-medium">Post New Job</div>
-              <div className="text-xs opacity-75">Add a new job posting</div>
-            </button>
-            <button className="btn-secondary p-4 text-left">
-              <DocumentTextIcon className="h-6 w-6 mb-2" />
-              <div className="text-sm font-medium">Upload Resume</div>
-              <div className="text-xs opacity-75">Submit candidate resume</div>
-            </button>
-            <button className="btn-secondary p-4 text-left">
-              <ChartBarIcon className="h-6 w-6 mb-2" />
-              <div className="text-sm font-medium">Run Evaluation</div>
-              <div className="text-xs opacity-75">Evaluate resume against job</div>
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center p-6 bg-blue-50 rounded-lg">
+              <BriefcaseIcon className="h-8 w-8 text-blue-600 mx-auto mb-3" />
+              <h4 className="font-medium text-secondary-900 mb-2">1. Upload Job Description</h4>
+              <p className="text-sm text-secondary-600 mb-4">
+                Post job requirements with required and preferred skills
+              </p>
+              <button className="btn-primary text-sm">Go to Jobs</button>
+            </div>
+
+            <div className="text-center p-6 bg-green-50 rounded-lg">
+              <DocumentTextIcon className="h-8 w-8 text-green-600 mx-auto mb-3" />
+              <h4 className="font-medium text-secondary-900 mb-2">2. Collect Resumes</h4>
+              <p className="text-sm text-secondary-600 mb-4">
+                Students upload resumes which are automatically parsed
+              </p>
+              <button className="btn-primary text-sm">Go to Resumes</button>
+            </div>
+
+            <div className="text-center p-6 bg-purple-50 rounded-lg">
+              <ChartBarIcon className="h-8 w-8 text-purple-600 mx-auto mb-3" />
+              <h4 className="font-medium text-secondary-900 mb-2">3. Analyze & Review</h4>
+              <p className="text-sm text-secondary-600 mb-4">
+                Use batch evaluation above or review results in Evaluations
+              </p>
+              <button className="btn-primary text-sm">Go to Evaluations</button>
+            </div>
           </div>
         </div>
       </div>

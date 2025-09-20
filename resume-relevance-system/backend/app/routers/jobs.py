@@ -7,22 +7,42 @@ from app.models.database import get_db, Job as DBJob
 from app.models.schemas import (
     JobCreate, Job, JobResponse, JobListResponse
 )
+from app.services.jd_parser import InnomaticsJDParser
 
 router = APIRouter()
+jd_parser = InnomaticsJDParser()
 
 
 @router.post("/", response_model=JobResponse)
 async def create_job(job: JobCreate, db: Session = Depends(get_db)):
-    """Create a new job posting"""
+    """Create a new job posting with automatic JD parsing"""
     try:
+        # Parse the job description to extract structured information
+        jd_analysis = jd_parser.parse_job_description(
+            jd_text=job.description,
+            role_title=job.title,
+            company_name=job.company
+        )
+        
+        # Enhance the job data with parsed information
+        # Combine user-provided skills with auto-extracted skills
+        all_required_skills = list(set(job.required_skills + jd_analysis.must_have_skills))
+        all_preferred_skills = list(set(job.preferred_skills + jd_analysis.good_to_have_skills))
+        
+        # Use parsed qualifications if not provided
+        qualifications = job.qualifications or "; ".join(jd_analysis.qualifications)
+        
+        # Use parsed experience requirement if not provided
+        experience_required = job.experience_required or jd_analysis.experience_required
+        
         db_job = DBJob(
             title=job.title,
             company=job.company,
             description=job.description,
-            required_skills=json.dumps(job.required_skills),
-            preferred_skills=json.dumps(job.preferred_skills),
-            qualifications=job.qualifications,
-            experience_required=job.experience_required,
+            required_skills=json.dumps(all_required_skills),
+            preferred_skills=json.dumps(all_preferred_skills),
+            qualifications=qualifications,
+            experience_required=experience_required,
             location=job.location,
         )
         
@@ -47,7 +67,7 @@ async def create_job(job: JobCreate, db: Session = Depends(get_db)):
         
         return JobResponse(
             success=True,
-            message="Job created successfully",
+            message=f"Job created successfully with {len(jd_analysis.must_have_skills)} required skills and {len(jd_analysis.good_to_have_skills)} preferred skills auto-extracted",
             data=Job(**job_dict)
         )
     

@@ -6,8 +6,16 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite:///./resume_system.db"
     
-    # OpenAI
-    openai_api_key: str = ""
+    # Pinecone Configuration
+    pinecone_api_key: str = "pcsk_4B27To_tY2jeLoxqgm97GKUfwxMccU39ZsN3jcd2D8Lq7UjZhjwEyHerwKDc8hpeinqpe"
+    pinecone_index_name: str = "lang"
+    pinecone_environment: str = "us-east-1"
+    
+    # Nomic AI Configuration (for embeddings)
+    nomic_api_key: str = "nk-LeXriqiihZl6pT8TT4QhSB8JQVhmJBAznO6Y-EaaDX4"
+    
+    # Google Gemini Configuration
+    gemini_api_key: str = ""  # Add your Gemini API key here
     
     # Application
     app_name: str = "Resume Relevance Check System"
@@ -25,9 +33,14 @@ class Settings(BaseSettings):
     upload_dir: str = "uploads"
     
     # AI Settings
-    embedding_model: str = "all-MiniLM-L6-v2"
-    llm_model: str = "gpt-3.5-turbo"
+    embedding_model: str = "nomic-embed-text-v1.5"
+    llm_model: str = "gemini-1.5-flash"  # Changed from OpenAI to Gemini
     similarity_threshold: float = 0.7
+    embedding_dimensionality: int = 256
+    
+    # Text Processing Settings
+    chunk_size: int = 500
+    chunk_overlap: int = 50
     
     # Scoring Weights
     hard_match_weight: float = 0.4

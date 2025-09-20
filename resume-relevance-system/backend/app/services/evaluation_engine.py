@@ -1,10 +1,10 @@
 import json
 import re
 from typing import Dict, List, Any, Tuple
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
-from fuzzywuzzy import fuzz
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.metrics.pairwise import cosine_similarity
+# from sentence_transformers import SentenceTransformer
+# from fuzzywuzzy import fuzz
 import numpy as np
 import asyncio
 
@@ -17,16 +17,16 @@ class EvaluationEngine:
     def __init__(self):
         """Initialize the evaluation engine"""
         self.embedding_model = None
-        self.tfidf_vectorizer = TfidfVectorizer(
-            max_features=1000,
-            stop_words='english',
-            ngram_range=(1, 2)
-        )
+        # self.tfidf_vectorizer = TfidfVectorizer(
+        #     max_features=1000,
+        #     stop_words='english',
+        #     ngram_range=(1, 2)
+        # )
         self._initialize_models()
         
         # Scoring weights
-        self.hard_match_weight = settings.hard_match_weight
-        self.semantic_match_weight = settings.semantic_match_weight
+        self.hard_match_weight = getattr(settings, 'hard_match_weight', 0.6)
+        self.semantic_match_weight = getattr(settings, 'semantic_match_weight', 0.4)
         
         # Skill categories for better matching
         self.skill_categories = {
@@ -54,12 +54,29 @@ class EvaluationEngine:
     
     def _initialize_models(self):
         """Initialize ML models"""
-        try:
-            self.embedding_model = SentenceTransformer(settings.embedding_model)
-            print("✓ Sentence transformer model loaded successfully")
-        except Exception as e:
-            print(f"Warning: Could not load sentence transformer model: {e}")
-            self.embedding_model = None
+        # Temporarily disable sentence transformers to avoid model loading issues
+        # try:
+        #     self.embedding_model = SentenceTransformer(settings.embedding_model)
+        #     print("✓ Sentence transformer model loaded successfully")
+        # except Exception as e:
+        #     print(f"Warning: Could not load sentence transformer model: {e}")
+        #     self.embedding_model = None
+        self.embedding_model = None
+        print("Note: Sentence transformer disabled for dependency compatibility")
+    
+    def _calculate_string_similarity(self, s1: str, s2: str) -> float:
+        """Calculate simple string similarity without external libraries"""
+        # Convert to lowercase for comparison
+        s1, s2 = s1.lower(), s2.lower()
+        
+        # Calculate character overlap
+        common_chars = set(s1) & set(s2)
+        total_chars = set(s1) | set(s2)
+        
+        if not total_chars:
+            return 0.0
+        
+        return (len(common_chars) / len(total_chars)) * 100
     
     def normalize_skill(self, skill: str) -> str:
         """Normalize skill name for better matching"""
@@ -110,8 +127,8 @@ class EvaluationEngine:
         for job_skill in all_job_skills:
             if job_skill not in matched_skills:
                 for candidate_skill in candidate_skills:
-                    similarity = fuzz.ratio(job_skill, candidate_skill)
-                    if similarity >= 85:  # 85% similarity threshold
+                    similarity = self._calculate_string_similarity(job_skill, candidate_skill)
+                    if similarity >= 70:  # 70% similarity threshold
                         matched_skills.append(job_skill)
                         break
         
@@ -146,63 +163,52 @@ class EvaluationEngine:
         job_data: Dict[str, Any], 
         resume_data: Dict[str, Any]
     ) -> float:
-        """Calculate semantic matching score using embeddings"""
+        """Calculate semantic matching score using simple text similarity"""
         
-        if not self.embedding_model:
-            # Fallback to TF-IDF based similarity
-            return self._calculate_tfidf_similarity(job_data, resume_data)
-        
+        # Fallback to simple text similarity without heavy ML dependencies
+        return self._calculate_simple_text_similarity(job_data, resume_data)
+    
+    def _calculate_simple_text_similarity(
+        self,
+        job_data: Dict[str, Any], 
+        resume_data: Dict[str, Any]
+    ) -> float:
+        """Simple text-based similarity without ML dependencies"""
         try:
             # Prepare job description
-            job_text = f"{job_data.get('title', '')} {job_data.get('description', '')}"
-            job_text = job_text.strip()
+            job_text = f"{job_data.get('title', '')} {job_data.get('description', '')}".lower()
             
             # Prepare resume text
-            resume_text = resume_data.get('text', '')
+            resume_text = resume_data.get('text', '').lower()
             
             if not job_text or not resume_text:
                 return 0.0
             
-            # Generate embeddings
-            job_embedding = self.embedding_model.encode([job_text])
-            resume_embedding = self.embedding_model.encode([resume_text])
+            # Simple word overlap calculation
+            job_words = set(job_text.split())
+            resume_words = set(resume_text.split())
             
-            # Calculate cosine similarity
-            similarity = cosine_similarity(job_embedding, resume_embedding)[0][0]
+            # Calculate Jaccard similarity
+            intersection = len(job_words & resume_words)
+            union = len(job_words | resume_words)
             
-            # Convert to percentage
-            semantic_score = float(similarity) * 100
-            
-            return min(semantic_score, 100.0)
+            if union == 0:
+                return 0.0
+                
+            jaccard_similarity = intersection / union
+            return min(jaccard_similarity * 100, 100.0)
         
         except Exception as e:
             print(f"Error in semantic matching: {e}")
-            return self._calculate_tfidf_similarity(job_data, resume_data)
+            return 0.0
     
     def _calculate_tfidf_similarity(
         self, 
         job_data: Dict[str, Any], 
         resume_data: Dict[str, Any]
     ) -> float:
-        """Fallback TF-IDF based similarity calculation"""
-        try:
-            job_text = f"{job_data.get('title', '')} {job_data.get('description', '')}"
-            resume_text = resume_data.get('text', '')
-            
-            if not job_text or not resume_text:
-                return 0.0
-            
-            # Vectorize texts
-            tfidf_matrix = self.tfidf_vectorizer.fit_transform([job_text, resume_text])
-            
-            # Calculate similarity
-            similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-            
-            return float(similarity) * 100
-        
-        except Exception as e:
-            print(f"Error in TF-IDF similarity: {e}")
-            return 0.0
+        """Fallback simple text similarity calculation"""
+        return self._calculate_simple_text_similarity(job_data, resume_data)
     
     def calculate_qualification_match(
         self, 

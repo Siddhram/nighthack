@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime
 
 from app.models.database import get_db, Resume as DBResume
-from app.models.schemas import Resume, ResumeResponse, FileUploadResponse
+from app.models.schemas import Resume, ResumeResponse, ResumeListResponse, FileUploadResponse
 from app.services.resume_parser import ResumeParser
 from app.config import settings
 
@@ -18,8 +18,8 @@ resume_parser = ResumeParser()
 @router.post("/upload", response_model=ResumeResponse)
 async def upload_resume(
     file: UploadFile = File(...),
-    candidate_name: str = Form(...),
-    email: str = Form(...),
+    candidate_name: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
     phone: Optional[str] = Form(None),
     db: Session = Depends(get_db)
 ):
@@ -59,11 +59,24 @@ async def upload_resume(
         # Parse resume
         parsed_data = resume_parser.parse_resume(file_path)
         
+        # Use extracted contact info if not provided in form
+        contact_info = parsed_data.get('contact_info', {})
+        final_candidate_name = candidate_name or contact_info.get('name', 'Unknown Candidate')
+        final_email = email or contact_info.get('email', '')
+        final_phone = phone or contact_info.get('phone', '')
+        
+        # If still no name, try to extract from filename
+        if final_candidate_name == 'Unknown Candidate' and file.filename:
+            # Remove extension and clean filename for candidate name
+            base_name = os.path.splitext(file.filename)[0]
+            # Replace underscores/dashes with spaces and title case
+            final_candidate_name = base_name.replace('_', ' ').replace('-', ' ').title()
+        
         # Save to database
         db_resume = DBResume(
-            candidate_name=candidate_name,
-            email=email,
-            phone=phone,
+            candidate_name=final_candidate_name,
+            email=final_email,
+            phone=final_phone,
             filename=file.filename,
             file_path=file_path,
             extracted_text=parsed_data.get('text', ''),
@@ -96,7 +109,7 @@ async def upload_resume(
         
         return ResumeResponse(
             success=True,
-            message="Resume uploaded and parsed successfully",
+            message=f"Resume uploaded successfully for {db_resume.candidate_name}",
             data=Resume(**resume_dict)
         )
     
@@ -114,7 +127,7 @@ async def upload_resume(
         )
 
 
-@router.get("/", response_model=List[Resume])
+@router.get("/", response_model=ResumeListResponse)
 async def list_resumes(
     skip: int = 0,
     limit: int = 50,
@@ -122,7 +135,9 @@ async def list_resumes(
 ):
     """List all resumes with pagination"""
     try:
-        resumes = db.query(DBResume).offset(skip).limit(limit).all()
+        query = db.query(DBResume)
+        total = query.count()
+        resumes = query.offset(skip).limit(limit).all()
         
         resume_list = []
         for db_resume in resumes:
@@ -142,7 +157,12 @@ async def list_resumes(
             }
             resume_list.append(Resume(**resume_dict))
         
-        return resume_list
+        return ResumeListResponse(
+            success=True,
+            message="Resumes retrieved successfully",
+            data=resume_list,
+            total=total
+        )
     
     except Exception as e:
         raise HTTPException(

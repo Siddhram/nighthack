@@ -66,7 +66,8 @@ export const resumeAPI = {
     limit?: number 
   }): Promise<Resume[]> => {
     const response = await api.get('/resumes/', { params });
-    return response.data;
+    // Backend now returns ResumeListResponse format like jobs
+    return response.data.data;
   },
 
   get: async (id: number): Promise<ApiResponse<Resume>> => {

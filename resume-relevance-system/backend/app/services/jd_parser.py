@@ -1,5 +1,5 @@
 import re
-import spacy
+# import spacy  # Temporarily disabled to avoid dependency conflicts
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 
@@ -28,11 +28,14 @@ class InnomaticsJDParser:
     
     def __init__(self):
         """Initialize the JD parser with NLP models and skill databases"""
-        try:
-            self.nlp = spacy.load("en_core_web_sm")
-        except OSError:
-            print("Warning: spaCy model not found. Please install: python -m spacy download en_core_web_sm")
-            self.nlp = None
+        # Temporarily disable spaCy to avoid dependency conflicts
+        # try:
+        #     self.nlp = spacy.load("en_core_web_sm")
+        # except OSError:
+        #     print("Warning: spaCy model not found. Please install: python -m spacy download en_core_web_sm")
+        #     self.nlp = None
+        self.nlp = None
+        print("Note: Using regex-based parsing without spaCy for dependency compatibility")
         
         # Comprehensive skill databases for Indian tech industry
         self.technical_skills_db = {

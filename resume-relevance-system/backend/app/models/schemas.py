@@ -112,6 +112,13 @@ class JobListResponse(BaseModel):
     total: int = 0
 
 
+class ResumeListResponse(BaseModel):
+    success: bool
+    message: str
+    data: List[Resume] = []
+    total: int = 0
+
+
 class EvaluationListResponse(BaseModel):
     success: bool
     message: str

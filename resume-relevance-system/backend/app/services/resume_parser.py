@@ -2,7 +2,7 @@ import PyPDF2
 from io import BytesIO
 from docx import Document
 import re
-import spacy
+# import spacy  # Commented out for now to avoid dependency conflicts
 from typing import Dict, List, Any
 import os
 
@@ -12,11 +12,14 @@ class ResumeParser:
     
     def __init__(self):
         """Initialize the resume parser with NLP model"""
-        try:
-            self.nlp = spacy.load("en_core_web_sm")
-        except OSError:
-            print("Warning: spaCy model not found. Please install with: python -m spacy download en_core_web_sm")
-            self.nlp = None
+        # try:
+        #     self.nlp = spacy.load("en_core_web_sm")
+        # except OSError:
+        #     print("Warning: spaCy model not found. Please install with: python -m spacy download en_core_web_sm")
+        #     self.nlp = None
+        
+        # Using regex-based parsing for now
+        self.nlp = None
         
         # Common skill patterns and keywords
         self.skill_patterns = [
@@ -254,6 +257,19 @@ class ResumeParser:
         phone_match = re.search(phone_pattern, text)
         if phone_match:
             contact['phone'] = phone_match.group(0)
+        
+        # Simple name extraction - look for the first line that looks like a name
+        lines = text.split('\n')
+        for line in lines[:5]:  # Check first 5 lines
+            line = line.strip()
+            # Skip empty lines and common headers
+            if not line or line.lower() in ['resume', 'curriculum vitae', 'cv']:
+                continue
+            # Look for lines that could be names (2-4 words, mostly letters)
+            words = line.split()
+            if 2 <= len(words) <= 4 and all(word.replace('.', '').replace(',', '').isalpha() for word in words):
+                contact['name'] = line
+                break
         
         return contact
 

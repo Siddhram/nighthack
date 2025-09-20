@@ -148,6 +148,9 @@ async def list_evaluations(
         if suitability:
             query = query.filter(DBEvaluation.suitability == suitability)
         
+        # Order by relevance score descending (highest scores first)
+        query = query.order_by(DBEvaluation.relevance_score.desc())
+        
         total = query.count()
         evaluations = query.offset(skip).limit(limit).all()
         

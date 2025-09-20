@@ -123,12 +123,12 @@ class EvaluationEngine:
             if job_skill in candidate_skills:
                 matched_skills.append(job_skill)
         
-        # Fuzzy matches for similar skills
+        # Fuzzy matches for similar skills (made less strict)
         for job_skill in all_job_skills:
             if job_skill not in matched_skills:
                 for candidate_skill in candidate_skills:
                     similarity = self._calculate_string_similarity(job_skill, candidate_skill)
-                    if similarity >= 70:  # 70% similarity threshold
+                    if similarity >= 50:  # Reduced from 70% to 50% for less strict matching
                         matched_skills.append(job_skill)
                         break
         
@@ -140,16 +140,16 @@ class EvaluationEngine:
         required_matched = sum(1 for skill in required_skills if skill in matched_skills)
         preferred_matched = sum(1 for skill in preferred_skills if skill in matched_skills)
         
-        # Score calculation: required skills have 70% weight, preferred have 30%
+        # Score calculation: required skills have 60% weight, preferred have 40% (made less strict)
         if len(required_skills) > 0:
-            required_score = (required_matched / len(required_skills)) * 0.7
+            required_score = (required_matched / len(required_skills)) * 0.6
         else:
             required_score = 0
         
         if len(preferred_skills) > 0:
-            preferred_score = (preferred_matched / len(preferred_skills)) * 0.3
+            preferred_score = (preferred_matched / len(preferred_skills)) * 0.4
         else:
-            preferred_score = 0.3  # Full preferred score if no preferred skills listed
+            preferred_score = 0.4  # Full preferred score if no preferred skills listed
         
         hard_match_score = (required_score + preferred_score) * 100
         
@@ -246,10 +246,10 @@ class EvaluationEngine:
         return matched_qualifications, missing_qualifications
     
     def determine_suitability(self, relevance_score: float) -> str:
-        """Determine suitability level based on score"""
-        if relevance_score >= 80:
+        """Determine suitability level based on score (made less strict)"""
+        if relevance_score >= 70:  # Reduced from 80 to 70
             return "High"
-        elif relevance_score >= 60:
+        elif relevance_score >= 45:  # Reduced from 60 to 45
             return "Medium"
         else:
             return "Low"
@@ -288,10 +288,10 @@ class EvaluationEngine:
             if len(missing_skills) > 3:
                 feedback_parts.append(f"📚 Additional skills to explore: {', '.join(missing_skills[3:6])}")
         
-        # Recommendations based on score
-        if relevance_score < 60:
+        # Recommendations based on score (made less strict)
+        if relevance_score < 45:  # Reduced from 60 to 45
             feedback_parts.append("💼 Recommendation: Focus on building the key skills mentioned above and gain relevant project experience.")
-        elif relevance_score < 80:
+        elif relevance_score < 70:  # Reduced from 80 to 70
             feedback_parts.append("🚀 Recommendation: You're on the right track! Consider specializing in a few key areas and showcasing relevant projects.")
         else:
             feedback_parts.append("⭐ Recommendation: Great profile! Consider applying and highlighting your strongest skills in your application.")

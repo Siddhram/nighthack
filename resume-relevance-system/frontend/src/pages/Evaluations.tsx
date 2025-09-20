@@ -90,8 +90,8 @@ export default function Evaluations() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
+    if (score >= 70) return 'text-green-600';  // Reduced from 80 to match less strict evaluation
+    if (score >= 45) return 'text-yellow-600'; // Reduced from 60 to match less strict evaluation
     return 'text-red-600';
   };
 

@@ -1,0 +1,41 @@
+# Web Framework
+fastapi==0.108.0
+uvicorn[standard]==0.25.0
+
+# Database
+sqlalchemy==2.0.25
+alembic==1.13.1
+
+# Document Processing
+PyMuPDF==1.23.26
+python-docx==1.1.2
+python-multipart==0.0.9
+
+# NLP and AI - Compatible versions
+spacy==3.7.2
+nltk==3.8.1
+langchain==0.1.20
+langchain-openai==0.0.8
+langchain-community==0.0.38
+openai==1.14.3
+sentence-transformers==2.4.0
+scikit-learn==1.4.1.post1
+
+# Vector Stores
+chromadb==0.4.24
+faiss-cpu==1.8.0
+
+# Utilities - Compatible pydantic version
+python-dotenv==1.0.1
+pydantic==2.5.3
+pydantic-settings==2.1.0
+numpy==1.26.4
+pandas==2.2.1
+fuzzywuzzy==0.18.0
+python-levenshtein==0.25.1
+
+# Pinecone and Google AI
+pinecone-client==4.1.0
+google-generativeai==0.8.3
+nomic==3.0.43
+PyPDF2==3.0.1

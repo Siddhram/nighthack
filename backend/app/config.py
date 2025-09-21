@@ -25,7 +25,12 @@ class Settings(BaseSettings):
     
     # CORS
     frontend_url: str = "http://localhost:3000"
-    allowed_origins: List[str] = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    allowed_origins: List[str] = [
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "http://localhost:5173",  # Vite dev server
+        "https://nighthack-ytan.vercel.app"  # Your Vercel frontend
+    ]
     
     # File Upload
     max_file_size: int = 10 * 1024 * 1024  # 10MB

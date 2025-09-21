@@ -11,8 +11,10 @@ import type {
 } from '../types';
 
 // Create axios instance with base configuration
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://nighthack.onrender.com/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

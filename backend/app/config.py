@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import List
+import os
 
 
 class Settings(BaseSettings):
@@ -15,13 +16,13 @@ class Settings(BaseSettings):
     nomic_api_key: str = "nk-LeXriqiihZl6pT8TT4QhSB8JQVhmJBAznO6Y-EaaDX4"
     
     # Google Gemini Configuration
-    gemini_api_key: str = ""  # Add your Gemini API key here
+    gemini_api_key: str = "AIzaSyCdJtJj4eHmFEGU2iyyiVrwlf4jrH3P45Q"  # Default from .env.render
     
     # Application
     app_name: str = "Resume Relevance Check System"
-    debug: bool = True
+    debug: bool = False  # Default to False for production
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = int(os.getenv("PORT", 8000))  # Support Render's PORT env var
     
     # CORS
     frontend_url: str = "http://localhost:3000"

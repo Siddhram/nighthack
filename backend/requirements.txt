@@ -7,7 +7,8 @@ sqlalchemy==2.0.25
 alembic==1.13.1
 
 # Document Processing (Render-friendly)
-PyMuPDF==1.23.4   # pre-built wheel, avoids C++ compilation errors
+PyMuPDF==1.23.4
+   # pre-built wheel, avoids C++ compilation errors
 python-docx==1.1.2
 python-multipart==0.0.9
 PyPDF2==3.0.1

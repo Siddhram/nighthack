@@ -11,7 +11,7 @@ import type {
 } from '../types';
 
 // Create axios instance with base configuration
-const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://nighthack.onrender.com/api';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || 'https://nighthack.onrender.com';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -23,7 +23,7 @@ const api = axios.create({
 // Job API
 export const jobAPI = {
   create: async (jobData: JobCreate): Promise<ApiResponse<Job>> => {
-    const response = await api.post('/jobs/', jobData);
+    const response = await api.post('/api/jobs/', jobData);
     return response.data;
   },
 
@@ -32,22 +32,22 @@ export const jobAPI = {
     limit?: number; 
     active_only?: boolean 
   }): Promise<ApiListResponse<Job>> => {
-    const response = await api.get('/jobs/', { params });
+    const response = await api.get('/api/jobs/', { params });
     return response.data;
   },
 
   get: async (id: number): Promise<ApiResponse<Job>> => {
-    const response = await api.get(`/jobs/${id}`);
+    const response = await api.get(`/api/jobs/${id}`);
     return response.data;
   },
 
   update: async (id: number, jobData: JobCreate): Promise<ApiResponse<Job>> => {
-    const response = await api.put(`/jobs/${id}`, jobData);
+    const response = await api.put(`/api/jobs/${id}`, jobData);
     return response.data;
   },
 
   delete: async (id: number): Promise<ApiResponse> => {
-    const response = await api.delete(`/jobs/${id}`);
+    const response = await api.delete(`/api/jobs/${id}`);
     return response.data;
   },
 };
@@ -55,7 +55,7 @@ export const jobAPI = {
 // Resume API
 export const resumeAPI = {
   upload: async (formData: FormData): Promise<ApiResponse<Resume>> => {
-    const response = await api.post('/resumes/upload', formData, {
+    const response = await api.post('/api/resumes/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -67,18 +67,18 @@ export const resumeAPI = {
     skip?: number; 
     limit?: number 
   }): Promise<Resume[]> => {
-    const response = await api.get('/resumes/', { params });
+    const response = await api.get('/api/resumes/', { params });
     // Backend now returns ResumeListResponse format like jobs
     return response.data.data;
   },
 
   get: async (id: number): Promise<ApiResponse<Resume>> => {
-    const response = await api.get(`/resumes/${id}`);
+    const response = await api.get(`/api/resumes/${id}`);
     return response.data;
   },
 
   delete: async (id: number): Promise<ApiResponse> => {
-    const response = await api.delete(`/resumes/${id}`);
+    const response = await api.delete(`/api/resumes/${id}`);
     return response.data;
   },
 };
@@ -89,7 +89,7 @@ export const evaluationAPI = {
     jobId: number, 
     resumeId: number
   ): Promise<ApiResponse<EvaluationResult>> => {
-    const response = await api.post('/evaluations/evaluate', null, {
+    const response = await api.post('/api/evaluations/evaluate', null, {
       params: { job_id: jobId, resume_id: resumeId },
     });
     return response.data;
@@ -102,17 +102,17 @@ export const evaluationAPI = {
     skip?: number;
     limit?: number;
   }): Promise<ApiListResponse<Evaluation>> => {
-    const response = await api.get('/evaluations/', { params });
+    const response = await api.get('/api/evaluations/', { params });
     return response.data;
   },
 
   get: async (id: number): Promise<ApiResponse<Evaluation>> => {
-    const response = await api.get(`/evaluations/${id}`);
+    const response = await api.get(`/api/evaluations/${id}`);
     return response.data;
   },
 
   delete: async (id: number): Promise<ApiResponse> => {
-    const response = await api.delete(`/evaluations/${id}`);
+    const response = await api.delete(`/api/evaluations/${id}`);
     return response.data;
   },
 };
@@ -120,17 +120,17 @@ export const evaluationAPI = {
 // Dashboard API
 export const dashboardAPI = {
   getStats: async (): Promise<DashboardStats> => {
-    const response = await api.get('/dashboard/stats');
+    const response = await api.get('/api/dashboard/stats');
     return response.data;
   },
 
   getJobPerformance: async (jobId: number) => {
-    const response = await api.get(`/dashboard/job-performance/${jobId}`);
+    const response = await api.get(`/api/dashboard/job-performance/${jobId}`);
     return response.data;
   },
 
   getTopCandidates: async (jobId: number, limit: number = 10) => {
-    const response = await api.get(`/dashboard/top-candidates/${jobId}`, {
+    const response = await api.get(`/api/dashboard/top-candidates/${jobId}`, {
       params: { limit },
     });
     return response.data;

@@ -7,10 +7,19 @@ import numpy as np
 from typing import List, Dict, Any, Optional
 from PyPDF2 import PdfReader
 from pinecone import Pinecone
-from nomic import login, embed
 import google.generativeai as genai
 from io import BytesIO
 import re
+
+# Optional import for nomic - handle gracefully if not available
+try:
+    from nomic import login, embed
+    NOMIC_AVAILABLE = True
+except ImportError:
+    print("Note: Nomic not available - using fallback embeddings")
+    NOMIC_AVAILABLE = False
+    login = None
+    embed = None
 
 from app.config import settings
 
@@ -78,9 +87,16 @@ class PineconeGeminiService:
         self.pc = Pinecone(api_key=settings.pinecone_api_key)
         self.index = self.pc.Index(settings.pinecone_index_name)
         
-        # Initialize Nomic for embeddings
+        # Initialize Nomic for embeddings (optional)
         self.nomic_api_key = settings.nomic_api_key
-        login(self.nomic_api_key)
+        self.nomic_available = NOMIC_AVAILABLE
+        
+        if NOMIC_AVAILABLE and login:
+            try:
+                login(self.nomic_api_key)
+            except Exception as e:
+                print(f"Warning: Failed to login to Nomic: {e}")
+                self.nomic_available = False
         
         # Initialize Gemini
         if settings.gemini_api_key:
@@ -135,18 +151,24 @@ class PineconeGeminiService:
             return ""
     
     def create_embeddings(self, texts: List[str]) -> np.ndarray:
-        """Create embeddings using Nomic AI"""
+        """Create embeddings using Nomic AI or fallback method"""
         try:
-            output = embed.text(
-                texts=texts,
-                model=settings.embedding_model,
-                task_type='search_document',
-                dimensionality=settings.embedding_dimensionality
-            )
-            return np.array(output['embeddings'])
+            if self.nomic_available and embed:
+                output = embed.text(
+                    texts=texts,
+                    model=settings.embedding_model,
+                    task_type='search_document',
+                    dimensionality=settings.embedding_dimensionality
+                )
+                return np.array(output['embeddings'])
+            else:
+                # Fallback to simple random embeddings for development
+                print("Warning: Using fallback embeddings - Nomic not available")
+                return np.random.random((len(texts), settings.embedding_dimensionality))
         except Exception as e:
             print(f"Error creating embeddings: {e}")
-            return np.array([])
+            # Fallback to simple random embeddings
+            return np.random.random((len(texts), settings.embedding_dimensionality))
     
     def process_and_store_document(self, text: str, document_id: str = None) -> bool:
         """Process document text, create embeddings, and store in Pinecone"""

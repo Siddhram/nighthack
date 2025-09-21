@@ -37,6 +37,7 @@ python-levenshtein==0.25.1
 # External Services
 pinecone-client==4.1.0
 google-generativeai==0.8.3
+nomic==3.0.43
 
 # Additional dependencies for Docker
 gunicorn==21.2.0

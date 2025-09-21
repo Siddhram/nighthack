@@ -30,9 +30,9 @@ services:
       - key: GEMINI_API_KEY
         value: AIzaSyCdJtJj4eHmFEGU2iyyiVrwlf4jrH3P45Q
       - key: FRONTEND_URL
-        value: https://nighthack-ytan.vercel.app
+        value: https://nighthack-paw6.vercel.app
       - key: ALLOWED_ORIGINS
-        value: '["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "https://nighthack-ytan.vercel.app", "https://nighthack-ytan.vercel.app/"]'
+        value: '["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173", "https://nighthack-ytan.vercel.app", "https://nighthack-ytan.vercel.app/", "https://nighthack-paw6.vercel.app", "https://nighthack-paw6.vercel.app/"]'
       - key: MAX_FILE_SIZE
         value: 10485760
       - key: ALLOWED_EXTENSIONS
